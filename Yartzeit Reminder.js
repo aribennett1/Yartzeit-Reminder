@@ -110,7 +110,6 @@ function emailYartzeit(yartzeit, tonight, hebrewDate, data) {
       for (var j in data) {
         if (j == 0 || data[j][0] == "") {continue;}
         GmailApp.sendEmail(data[j][row], "Yartzeit Reminder", bodyHead + body, {
-          from: "aribennett1@gmail.com",
           name: "Yartzeit Reminder"
         });
       }
