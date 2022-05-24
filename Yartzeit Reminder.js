@@ -1,6 +1,7 @@
 function main() {  
-  var today = new Date("11/11/2022");  // date format: "3/29/2022" (with quotes)
-  var data = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794").getSheets()[0].getDataRange().getValues();
+  var today = new Date();
+  var spreadsheetID = ""; //insert sheet id between the quotes
+  var data = SpreadsheetApp.openById(spreadsheetID).getSheets()[0].getDataRange().getValues();
   var yartzeit = [];
   const hebrewDate = getHebrewDate(addDays(today, 1));
   console.log(`${hebrewDate.get("Day")} ${hebrewDate.get("Month")}`);
