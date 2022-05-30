@@ -10,7 +10,7 @@ function main() {
     return; 
   }  
   const tomorrowHebrewDate = getHebrewDate(tomorrow);
-  console.log(`${hebrewDate.get("Day")} ${hebrewDate.get("Month")}`);
+  console.log(`${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}`);
   const defaultHead = `Tonight, ${getReadable(today)} night, (${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}) is the yartzeit of~`;
   for (var i in data) {
     if (i == 0) {continue;}
