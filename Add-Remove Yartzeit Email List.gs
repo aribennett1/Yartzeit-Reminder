@@ -1,20 +1,16 @@
-const formSheet = SpreadsheetApp.openById("/*Insert ID Here*/").getSheets()[2];
+const sheet = SpreadsheetApp.openById(/*Insert ID Here*/);
+const formSheet = sheet.getSheets()[2];
 const formData = formSheet.getDataRange().getValues();
-const emailsSheet = SpreadsheetApp.openById("/*Insert ID Here*/").getSheets()[0];
+const emailsSheet = sheet.getSheets()[0];
 const emailsData = emailsSheet.getDataRange().getValues();
-// const form = FormApp.openById('/*Insert ID Here*/');  //Used to create trigger
 
-function main() {
-  // ScriptApp.newTrigger('main').forForm(form).onFormSubmit().create();
-  const formLastRow = formSheet.getLastRow() - 1;  
-  var lastestEntry = [];
-  for (var i = 1; i < 6; i++) {
-    if (formData[formLastRow][i] != "") {
-      lastestEntry.push(formData[formLastRow][i]);
-    }
-  }
-  lastestEntry[1] = lastestEntry[1].split(", ");
-  lastestEntry[0] == "Subscribe" ? addEmail(lastestEntry[1], lastestEntry[2]) : removeEmail(lastestEntry[1], lastestEntry[2]);  
+function main(e) {
+  // ScriptApp.newTrigger("main").forSpreadsheet(sheet).onFormSubmit().create(); //trigger
+  var latestEntry = [];
+  var values = e.values;
+  for (var i = 1; i < values.length; i++) {if (values[i] != "") {latestEntry.push(values[i]);}}
+  latestEntry[1] = latestEntry[1].split(", ");
+  latestEntry[0] == "Subscribe" ? addEmail(latestEntry[1], latestEntry[2]) : removeEmail(latestEntry[1], latestEntry[2]);  
 }
 
 function addEmail(family, email) {
