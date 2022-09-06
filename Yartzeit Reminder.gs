@@ -161,7 +161,7 @@ function emailYartzeit() {
       }
       console.log("html:" + html);
       console.log("Sent: " + body);
-      body, html, row = ``;
+      body = ``; html = ``; row = ``;
       picUrls = [];
       continue;
     }
