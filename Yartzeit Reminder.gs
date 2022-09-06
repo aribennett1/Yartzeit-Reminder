@@ -1,5 +1,6 @@
-const data = SpreadsheetApp.openById("/*Insert your ID here*/").getSheets()[1].getDataRange().getValues();
-const emails = SpreadsheetApp.openById("/*Insert your ID here*/").getSheets()[0].getDataRange().getValues();
+const sheet = SpreadsheetApp.openById("/*Insert your ID here*/");
+const data = sheet.getSheets()[1].getDataRange().getValues();
+const emails = sheet.getSheets()[0].getDataRange().getValues();
 var yartzeit = [];
 var today = new Date();  // date format (for testing): "3/29/2022" (with quotes)
 function main() {
@@ -149,7 +150,6 @@ function emailYartzeit() {
     }
     if (yartzeit[i].charAt(1) == "|") {
       row = yartzeit[i].charAt(0);
-      console.log("Row: " + row);
       body = body.slice(0, -2) + ".";
       html = getHtml(body, picUrls);
       for (var j in emails) {
