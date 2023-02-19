@@ -1,8 +1,8 @@
-const sheet = SpreadsheetApp.openById("/*Insert your ID here*/");
+const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
 const data = sheet.getSheets()[1].getDataRange().getValues();
 const emails = sheet.getSheets()[0].getDataRange().getValues();
 var yartzeit = [];
-var today = new Date();  // date format (for testing): "3/29/2022" (with quotes)
+var today = new Date();  // date format: "3/29/2022" (with quotes)
 function main() {
   var tomorrow = addDays(today, 1);
   if (PropertiesService.getScriptProperties().getProperty("sentUntil") > 0) {
@@ -62,32 +62,32 @@ function main() {
     }
     //In leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav.
     if (tomorrowHebrewDate.get("Month") == "Adar I" && data[i][1] == "Adar" && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfoWithNote(defaultHead, i, `The Yartziet is really on ${tomorrowHebrewDate.get("Day")} Adar. In a leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav what you should do.`);
+      pushInfoWithNote(defaultHead, i, `The Yartziet is really on ${tomorrowHebrewDate.get("Day")} Adar. In a leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav what you should do`);
     }
     // According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat of a non-leap year
     if (tomorrowHebrewDate.get("Month") == "Shvat" && !isLeapYear(tomorrowHebrewDate.get("Year"))) {
       if (data[i][1] == "Adar I" && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfoWithNote(defaultHead, i, `The Yartzeit is really on ${tomorrowHebrewDate.get("Day")} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year.`);
+      pushInfoWithNote(defaultHead, i, `The Yartzeit is really on ${tomorrowHebrewDate.get("Day")} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
       }
     }
     //send 30 cheshvon on 1 kilev if this year there is no 30 cheshvon
     if (tomorrowHebrewDate.get("Month") == "Kislev" && tomorrowHebrewDate.get("Day") == "1") {
       let hebrewDate = getHebrewDate(today);
       if (hebrewDate.get("Day") == "29" && data[i][1] == "Cheshvan" && data[i][0] == 30) {
-        pushInfoWithNote(defaultHead, i,`The Yartzeit is really on 30 Cheshvan. However, this year there is no 30 Cheshvan, so the Yartziet is observed on 1 Kislev.`);
+        pushInfoWithNote(defaultHead, i,`The Yartzeit is really on 30 Cheshvan. However, this year there is no 30 Cheshvan, so the Yartziet is observed on 1 Kislev`);
       }
     }
     //send 30 kislev on 1 teves if this year there is no 30 kislev
     if (tomorrowHebrewDate.get("Month") == "Teves" && tomorrowHebrewDate.get("Day") == "1") {
       let hebrewDate = getHebrewDate(today);
       if (hebrewDate.get("Day") == "29" && data[i][1] == "Kislev" && data[i][0] == 30) {
-         pushInfoWithNote(defaultHead, i, `The Yartzeit is really on 30 Kislev. However, this year there is no 30 Kislev, so the Yartziet is observed on 1 Teves.`);
+         pushInfoWithNote(defaultHead, i, `The Yartzeit is really on 30 Kislev. However, this year there is no 30 Kislev, so the Yartziet is observed on 1 Teves`);
       }
     }
     // send 30 Adar I on 1 Adar in a non - leap year
     if (tomorrowHebrewDate.get("Month") == "Adar" && tomorrowHebrewDate.get("Day") == "1") {
       if (data[i][1] == "Adar I" && data[i][0] == 30) {
-       pushInfoWithNote(defaultHead, i, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar.`);
+       pushInfoWithNote(defaultHead, i, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar`);
       }
     }
     //last if statement, 
@@ -113,9 +113,10 @@ function pushInfo(head, i) {
 function pushInfoWithNote(head, i, note) {
   yartzeit.push(head);
  for (var j = 3; j < 7; j++) {
-    yartzeit.push(data[i][j]);
-  }
-  yartzeit.push(". " + note);
+   if (j == 5) {yartzeit.push(`${data[i][j]}^`); continue;}
+   else {yartzeit.push(data[i][j]);}
+ }
+  yartzeit.push(note);
   yartzeit.push(data[i][7]); //Family Name
 }
 
@@ -148,13 +149,14 @@ function emailYartzeit() {
     if (yartzeit[i] == "" ) {
       continue;
     }
-    if (yartzeit[i].charAt(1) == "|") {
-      row = yartzeit[i].charAt(0);
+    if (yartzeit[i].includes("|")) {
+      row = parseInt(yartzeit[i].substring(0,yartzeit[i].indexOf("|")));
       body = body.slice(0, -2) + ".";
-      html = getHtml(body, picUrls);
+      html = buildHtml(body, picUrls);
       for (var j in emails) {
         if (j == 0 || emails[j][row] == "") {continue;};
         GmailApp.sendEmail(emails[j][row], "Yartzeit Reminder", "", {
+          from: "aribennett1@gmail.com",
           htmlBody: html,
           name: "Yartzeit Reminder"
         });
@@ -170,6 +172,11 @@ function emailYartzeit() {
         picUrls = getUrls(yartzeit[i].substring(1));
       }
       else {
+        if (yartzeit[i].charAt(yartzeit[i].length - 1) == "^") {
+         yartzeit[i] = yartzeit[i].slice(0, -1);
+         body += `${yartzeit[i]}. `;
+         continue;
+        }
         if (yartzeit[i].charAt(yartzeit[i].length - 1) != "~") {
          body += `${yartzeit[i]}, `;
         }
@@ -202,12 +209,12 @@ function getUrls(str) {
   return (!str.includes("*") ? [str] : str.split("*"));
 }
 
-function getHtml(body, urlArr) {
+function buildHtml(body, urlArr) {
 var html = `<p>${body}</p>`;
 urlArr.length == 1 ? html += `<br /><p>(1 Picture)</p>` : html += `<br /><p>(${urlArr.length} Pictures)</p>`;
 for (var i in urlArr) {
   html += `<br /><img src="${urlArr[i]}">`;
 }
-html += `<p>To update your email preferences, click here: <a href="<!-- Put your form link here -->"><!-- Put your link text here --></a>`;
+html += `<p>To update your email preferences, click here: <a href="bit.ly/familyYartzeits">bit.ly/familyYartzeits</a>`;
 return html;
 }
