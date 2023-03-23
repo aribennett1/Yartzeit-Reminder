@@ -4,6 +4,16 @@ const formData = formSheet.getDataRange().getValues();
 const emailsSheet = sheet.getSheets()[0];
 const emailsData = emailsSheet.getDataRange().getValues();
 
+function manualRun() {
+  const row = 6;
+  var latestEntry = [];
+  for (var col = 0; col < 6; col++) {
+      latestEntry.push(formData[row - 1][col]);
+    }
+  var e = {values: latestEntry};
+  main(e);
+}
+
 function main(e) {
   // ScriptApp.newTrigger("main").forSpreadsheet(sheet).onFormSubmit().create(); //trigger
   e.values[1] == "Subscribe" ? addEmail(e.values[4].split(", "), e.values[5]) : removeEmail(e.values[2].split(", "), e.values[3]);  
@@ -13,7 +23,7 @@ function addEmail(family, email) {
 var location, lastRow, col;
 for (var i in family) {
   col = getFamilyCol(family[i]);
-  lastRow = getFirstBlankRowInCol(col) + 1;
+  lastRow = getFirstBlankRowInCol(col);
   location = isEmailPresent(col, lastRow, email);
   if (location == -1) {
     emailsSheet.getRange((String.fromCharCode('A'.charCodeAt(0) + col)) + lastRow).setValue(email);
@@ -36,7 +46,7 @@ function getFamilyCol(family) {
 function getFirstBlankRowInCol(col) {
   for (var row = 1; row < emailsSheet.getLastRow(); row++) {
     if (emailsData[row][col].toString() == "") {
-      return row;
+      return row + 1;
     }
   }
   return emailsSheet.getLastRow() + 1;
@@ -64,8 +74,12 @@ var location, lastRow, col;
 
 function isEmailPresent(col, lastRow, email) {
   for (var row = 1; row < lastRow; row++) {
+    try {  
     if (emailsData[row][col].toString() == email) {
       return row + 1;
+    }
+    } catch (TypeError) {
+      return -1;
     }
   }
   return -1;
