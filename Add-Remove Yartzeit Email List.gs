@@ -75,7 +75,7 @@ var location, lastRow, col;
 function isEmailPresent(col, lastRow, email) {
   for (var row = 1; row < lastRow; row++) {
     try {  
-    if (emailsData[row][col].toString() == email) {
+    if (emailsData[row][col].toString().toLowerCase() == email.toLowerCase()) {
       return row + 1;
     }
     } catch (TypeError) {
