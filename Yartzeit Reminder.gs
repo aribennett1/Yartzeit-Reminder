@@ -1,9 +1,17 @@
-const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
+const sheet = SpreadsheetApp.openById(/*ID Removed*/);
 const data = sheet.getSheets()[1].getDataRange().getValues();
 const emails = sheet.getSheets()[0].getDataRange().getValues();
 var yartzeit = [];
 var today = new Date();  // date format: "3/29/2022" (with quotes)
 function main() {
+   if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
+console.log("Yartzeit was sent for today, exiting...");
+return; //this should be "continue" when testing! (not "return")
+}
+else {
+  PropertiesService.getScriptProperties().setProperty("lastDaySent", today.getDay());  
+console.log("lastDaySent: " + PropertiesService.getScriptProperties().getProperty("lastDaySent"));
+}
   var tomorrow = addDays(today, 1);
   if (PropertiesService.getScriptProperties().getProperty("sentUntil") > 0) {
     PropertiesService.getScriptProperties().setProperty("sentUntil", PropertiesService.getScriptProperties().getProperty("sentUntil") - 1);
@@ -12,7 +20,7 @@ function main() {
   }  
   const tomorrowHebrewDate = getHebrewDate(tomorrow);
   console.log(`${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}`);
-  const defaultHead = `Tonight, ${getReadable(today)} night, (${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}) is the yartzeit of~`;
+  const defaultHead = `Tonight, ${getReadable(today)}, (${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}) is the yartzeit of~`;
   for (var i in data) {
     if (i == 0) {continue;}
     // if erev Pesach, erev Shmini Shel Pesach, or erev Shavuos is Shabbos, send next three days on Friday (Rosh Hashana Sukkos, and Shmini Atzeres can't be on a Sunday)
@@ -20,10 +28,10 @@ function main() {
     (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 20 && tomorrow.getDay() == 6 && data[i][1] == "Nissan") ||
     (tomorrowHebrewDate.get("Month") == "Sivan" && tomorrowHebrewDate.get("Day") == 5 && tomorrow.getDay() == 6 && data[i][1] == "Sivan"))  {
       if (data[i][0] == 15 || data[i][0] == 21 || data[i][0] == 6) {
-        pushInfo(`Tomorrow night, ${getReadable(tomorrow)} night, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+        pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
       }
       if (data[i][0] == 16 || data[i][0] == 22 || data[i][0] == 7) {
-        pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))} night, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+        pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
       }
       PropertiesService.getScriptProperties().setProperty("sentUntil", 2);
     }
@@ -35,7 +43,7 @@ function main() {
         (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Nissan" && data[i][0] == 16) ||
         (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 21 && data[i][1] == "Nissan" && data[i][0] == 22) ||
         (tomorrowHebrewDate.get("Month") == "Sivan" && tomorrowHebrewDate.get("Day") == 6 && data[i][1] == "Sivan" && data[i][0] == 7)) {
-          pushInfo(`Tomorrow night, ${getReadable(tomorrow)} night, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+          pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
           if (PropertiesService.getScriptProperties().getProperty("sentUntil") != 2) {
             PropertiesService.getScriptProperties().setProperty("sentUntil", 1);
           }
@@ -46,7 +54,7 @@ function main() {
         (tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 22 && data[i][1] == "Tishrei" && data[i][0] == 24) ||
         (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Nissan" && data[i][0] == 17) ||
         (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 21 && data[i][1] == "Nissan" && data[i][0] == 23)) {
-          pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))} night, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+          pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
           PropertiesService.getScriptProperties().setProperty("sentUntil", 2);
           }
         }
@@ -54,7 +62,7 @@ function main() {
     }    
     //In a non-leap year, send yartziets of a leap year. Does not have Adar itself, will be processed in last if statement.
     if (tomorrowHebrewDate.get("Month") == "Adar" && (data[i][1] == "Adar I" || data[i][1] == "Adar II") && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfoWithNote(defaultHead, i, `(The yartzeit is really on ${data[i][0]} ${data[i][1]}, but this year is not a leap year).`);
+      pushInfoWithNote(defaultHead, i, `(The yartzeit is really on ${data[i][0]} ${data[i][1]}, but this year is not a leap year)`);
     }
     //If type of Adar is unknown
     if ((tomorrowHebrewDate.get("Month") == "Adar" || tomorrowHebrewDate.get("Month") == "Adar II") && data[i][1] == "Adar ?" && tomorrowHebrewDate.get("Day") == data[i][0]) {
@@ -105,19 +113,19 @@ function main() {
 
 function pushInfo(head, i) {
   yartzeit.push(head);
-  for (var j = 3; j < 8; j++) {
+  for (var j = 3; j < 9; j++) {
    yartzeit.push(data[i][j]);
   }
 }
 
 function pushInfoWithNote(head, i, note) {
   yartzeit.push(head);
- for (var j = 3; j < 7; j++) {
+ for (var j = 3; j < 8; j++) {
    if (j == 5) {yartzeit.push(`${data[i][j]}^`); continue;}
    else {yartzeit.push(data[i][j]);}
  }
   yartzeit.push(note);
-  yartzeit.push(data[i][7]); //Family Name
+  yartzeit.push(data[i][8]); //Family Name
 }
 
 function getHebrewDate(d) {
@@ -143,16 +151,17 @@ function getHebrewDate(d) {
 }
 
 function emailYartzeit() {
-  var row, html,body = ``;
+  var row, html, body = ``;
+  var vidUrls = [];
   var picUrls = [];
   for (var i = 0; i < yartzeit.length; i++) {
     if (yartzeit[i] == "" ) {
       continue;
-    }
+    }    
     if (yartzeit[i].includes("|")) {
       row = parseInt(yartzeit[i].substring(0,yartzeit[i].indexOf("|")));
       body = body.slice(0, -2) + ".";
-      html = buildHtml(body, picUrls);
+      html = buildHtml(body, picUrls, vidUrls);
       for (var j in emails) {
         if (j == 0 || emails[j][row] == "") {continue;};
         GmailApp.sendEmail(emails[j][row], "Yartzeit Reminder", "", {
@@ -163,13 +172,20 @@ function emailYartzeit() {
       }
       console.log("html:" + html);
       console.log("Sent: " + body);
+      console.log(`RemainingDailyQuota: ${MailApp.getRemainingDailyQuota()}`);
       body = ``; html = ``; row = ``;
       picUrls = [];
+      vidUrls = [];
       continue;
     }
     else {
-      if (yartzeit[i].charAt(0) == "*") {
-        picUrls = getUrls(yartzeit[i].substring(1));
+      if (yartzeit[i].charAt(0) == "*" || yartzeit[i].charAt(0) == "#") {
+        if (yartzeit[i].charAt(0) == "*") {
+        picUrls = getUrls(yartzeit[i].substring(1), "*");
+        }
+        if (yartzeit[i].charAt(0) == "#") {
+        vidUrls = getUrls(yartzeit[i].substring(1), "#");
+        }
       }
       else {
         if (yartzeit[i].charAt(yartzeit[i].length - 1) == "^") {
@@ -191,7 +207,11 @@ function emailYartzeit() {
 }
 
 function getReadable(day) {
-  return new Date(day).toLocaleDateString('en-us', { weekday:"long"});
+  if (day.getDay() == 6) {
+    return `Montzei Shabbos`;}  
+  else {
+    return `${new Date(day).toLocaleDateString('en-us', { weekday:"long"})} night`;
+  }
 }
 
 function addDays(date, days) {
@@ -205,15 +225,21 @@ function isLeapYear(year) {
   return (yearInCycle < 7 && yearInCycle % 3 == 0) || (yearInCycle > 6 && yearInCycle % 3 == 2);
 }
 
-function getUrls(str) {
-  return (!str.includes("*") ? [str] : str.split("*"));
+function getUrls(str, delimiter) {
+  return (!str.includes(delimiter) ? [str] : str.split(delimiter));
 }
 
-function buildHtml(body, urlArr) {
+function buildHtml(body, picUrlArr, vidUrlArr) {
 var html = `<p>${body}</p>`;
-urlArr.length == 1 ? html += `<br /><p>(1 Picture)</p>` : html += `<br /><p>(${urlArr.length} Pictures)</p>`;
-for (var i in urlArr) {
-  html += `<br /><img src="${urlArr[i]}">`;
+vidUrlArr.length == 1 ? html += `<p>1 Video</p>` : html += `<p>${vidUrlArr.length} Videos</p>`;
+html += "<ul>";
+for (var i in vidUrlArr) {
+  html += `<li><a href="${vidUrlArr[i]}">${vidUrlArr[i]}</a></li>`;
+}
+html += `</ul><p>If you'd like to record a video (or just record audio) for someone's yartzeit, please email me at <a href="mailto:aribennett1@gmail.com">aribennett1@gmail.com.</a></p>`;
+picUrlArr.length == 1 ? html += `<p>(1 Picture)</p>` : html += `<p>(${picUrlArr.length} Pictures)</p>`;
+for (var i in picUrlArr) {
+  html += `<p><img src="${picUrlArr[i]}"></p>`;
 }
 html += `<p>To update your email preferences, click here: <a href="bit.ly/familyYartzeits">bit.ly/familyYartzeits</a>`;
 return html;
