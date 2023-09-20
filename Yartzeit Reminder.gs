@@ -2,6 +2,7 @@ const sheet = SpreadsheetApp.openById(/*ID Removed*/);
 const data = sheet.getSheets()[1].getDataRange().getValues();
 const emails = sheet.getSheets()[0].getDataRange().getValues();
 var yartzeit = [];
+var isTomorrow = true;
 var today = new Date();  // date format: "3/29/2022" (with quotes)
 function main() {
    if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
@@ -12,12 +13,14 @@ else {
   PropertiesService.getScriptProperties().setProperty("lastDaySent", today.getDay());  
 console.log("lastDaySent: " + PropertiesService.getScriptProperties().getProperty("lastDaySent"));
 }
-  var tomorrow = addDays(today, 1);
-  if (PropertiesService.getScriptProperties().getProperty("sentUntil") > 0) {
+    if (PropertiesService.getScriptProperties().getProperty("sentUntil") > 0) {
     PropertiesService.getScriptProperties().setProperty("sentUntil", PropertiesService.getScriptProperties().getProperty("sentUntil") - 1);
     console.log("Today's yartzeit were already sent, exiting...");
     return; 
-  }  
+  }
+  for (var x = 1; x < 3; x++) {
+    if (x == 2) {isTomorrow = false;} 
+  var tomorrow = addDays(today, x);
   const tomorrowHebrewDate = getHebrewDate(tomorrow);
   console.log(`${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}`);
   const defaultHead = `Tonight, ${getReadable(today)}, (${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}) is the yartzeit of~`;
@@ -33,7 +36,7 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
       if (data[i][0] == 16 || data[i][0] == 22 || data[i][0] == 7) {
         pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
       }
-      PropertiesService.getScriptProperties().setProperty("sentUntil", 2);
+      setSentUntil(2);
     }
     // send the 2nd day of Yom Tov on Erev Yom (Rosh Hashana, Sukkos, Shmini Atzeres, Pesach, Shmini Shel Pesach, and Shavuos)
     else {
@@ -45,7 +48,7 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
         (tomorrowHebrewDate.get("Month") == "Sivan" && tomorrowHebrewDate.get("Day") == 6 && data[i][1] == "Sivan" && data[i][0] == 7)) {
           pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
           if (PropertiesService.getScriptProperties().getProperty("sentUntil") != 2) {
-            PropertiesService.getScriptProperties().setProperty("sentUntil", 1);
+            setSentUntil(1);
           }
           //if the day after Yom Tov is Shabbos, send three days after yom tov (Shavuos can't fall out on Thursday)
           if (today.getDay() == 3) {
@@ -55,7 +58,7 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
         (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Nissan" && data[i][0] == 17) ||
         (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 21 && data[i][1] == "Nissan" && data[i][0] == 23)) {
           pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
-          PropertiesService.getScriptProperties().setProperty("sentUntil", 2);
+          setSentUntil(2);
           }
         }
       }
@@ -104,10 +107,11 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
     }
   }
   if (yartzeit.length != 0) {
-    emailYartzeit();
+    buildEmail();
   }
   else {
     console.log("No Yartzeit Tomorrow");
+  }
   }
 }
 
@@ -150,8 +154,8 @@ function getHebrewDate(d) {
   return hebrewDate;  
 }
 
-function emailYartzeit() {
-  var row, html, body = ``;
+function buildEmail() {
+  var body = ``;
   var vidUrls = [];
   var picUrls = [];
   for (var i = 0; i < yartzeit.length; i++) {
@@ -159,21 +163,8 @@ function emailYartzeit() {
       continue;
     }    
     if (yartzeit[i].includes("|")) {
-      row = parseInt(yartzeit[i].substring(0,yartzeit[i].indexOf("|")));
-      body = body.slice(0, -2) + ".";
-      html = buildHtml(body, picUrls, vidUrls);
-      for (var j in emails) {
-        if (j == 0 || emails[j][row] == "") {continue;};
-        GmailApp.sendEmail(emails[j][row], "Yartzeit Reminder", "", {
-          from: "aribennett1@gmail.com",
-          htmlBody: html,
-          name: "Yartzeit Reminder"
-        });
-      }
-      console.log("html:" + html);
-      console.log("Sent: " + body);
-      console.log(`RemainingDailyQuota: ${MailApp.getRemainingDailyQuota()}`);
-      body = ``; html = ``; row = ``;
+      sendEmail(yartzeit[i], body, picUrls, vidUrls)
+      body = ``;
       picUrls = [];
       vidUrls = [];
       continue;
@@ -185,6 +176,9 @@ function emailYartzeit() {
         }
         if (yartzeit[i].charAt(0) == "#") {
         vidUrls = getUrls(yartzeit[i].substring(1), "#");
+          for (var j in vidUrls) {
+            vidUrls[j] = vidUrls[j].replace(/([^:]+): ([^ ]+) Alternate Link: ([^ ]+)/g, '$1: <a href="$2">$2</a> Alternate Link: <a href="$3">$3</a>');
+          }        
         }
       }
       else {
@@ -203,7 +197,35 @@ function emailYartzeit() {
       }
     }
   }
-  yartzeit = []; //reset array, only really here for testing
+  yartzeit = [];
+}
+
+function sendEmail(yartzeit, body, picUrls, vidUrls) {
+const row = parseInt(yartzeit.substring(0,yartzeit.indexOf("|")));
+body = body.slice(0, -2) + ".";
+var  html = buildHtml(body, picUrls, vidUrls);
+if (!isTomorrow) {
+  GmailApp.sendEmail("aribennett1@gmail.com", "TEST Yartzeit Reminder", "", {
+          from: "aribennett1@gmail.com",
+          htmlBody: html,
+          name: "Yartzeit Reminder"
+        });
+  console.log("Sent email for in 2 days");
+}
+else {
+      for (var j in emails) {
+        if (j == 0 || emails[j][row] == "") {continue;};
+        GmailApp.sendEmail(emails[j][row], "Yartzeit Reminder", "", {
+          from: "aribennett1@gmail.com",
+          htmlBody: html,
+          name: "Yartzeit Reminder"
+        });
+      }
+      console.log("Sent email for tomorrow");
+}         
+      console.log("html:" + html);
+      console.log("Sent: " + body);
+      console.log(`RemainingDailyQuota: ${MailApp.getRemainingDailyQuota()}`);
 }
 
 function getReadable(day) {
@@ -229,15 +251,19 @@ function getUrls(str, delimiter) {
   return (!str.includes(delimiter) ? [str] : str.split(delimiter));
 }
 
+function setSentUntil(days) {
+  if (isTomorrow) {PropertiesService.getScriptProperties().setProperty("sentUntil", days);}
+}
+
 function buildHtml(body, picUrlArr, vidUrlArr) {
 var html = `<p>${body}</p>`;
 vidUrlArr.length == 1 ? html += `<p>1 Video</p>` : html += `<p>${vidUrlArr.length} Videos</p>`;
 html += "<ul>";
 for (var i in vidUrlArr) {
-  html += `<li><a href="${vidUrlArr[i]}">${vidUrlArr[i]}</a></li>`;
+  html += `<li>${vidUrlArr[i]}</li>`;
 }
 html += `</ul><p>If you'd like to record a video (or just record audio) for someone's yartzeit, please email me at <a href="mailto:aribennett1@gmail.com">aribennett1@gmail.com.</a></p>`;
-picUrlArr.length == 1 ? html += `<p>(1 Picture)</p>` : html += `<p>(${picUrlArr.length} Pictures)</p>`;
+picUrlArr.length == 1 ? html += `<p>1 Picture</p>` : html += `<p>${picUrlArr.length} Pictures</p>`;
 for (var i in picUrlArr) {
   html += `<p><img src="${picUrlArr[i]}"></p>`;
 }
