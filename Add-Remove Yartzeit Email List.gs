@@ -1,4 +1,4 @@
-const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
+const sheet = SpreadsheetApp.openById(/*ID Removed*/);
 const formSheet = sheet.getSheets()[2];
 const formData = formSheet.getDataRange().getValues();
 const emailsSheet = sheet.getSheets()[0];
