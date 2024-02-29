@@ -243,8 +243,7 @@ function addDays(date, days) {
 }
 
 function isLeapYear(year) {
-  var yearInCycle = year % 19;
-  return (yearInCycle < 7 && yearInCycle % 3 == 0) || (yearInCycle > 6 && yearInCycle % 3 == 2);
+    return (((year * 7) + 1) % 19) < 7;
 }
 
 function getUrls(str, delimiter) {
