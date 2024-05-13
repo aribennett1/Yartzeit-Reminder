@@ -19,117 +19,122 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
     return; 
   }
   for (var x = 1; x < 3; x++) {
-    if (x == 2) {isTomorrow = false;} 
-  var tomorrow = addDays(today, x);
+    if (x == 2) {isTomorrow = false; today = addDays(today, 1);} 
+  var tomorrow = addDays(today, 1);
   const tomorrowHebrewDate = getHebrewDate(tomorrow);
-  console.log(`${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}`);
-  const defaultHead = `Tonight, ${getReadable(today)}, (${tomorrowHebrewDate.get("Day")} ${tomorrowHebrewDate.get("Month")}) is the yartzeit of~`;
+  var tomorrowHebrewDay = tomorrowHebrewDate.get("Day");
+  var tomorrowHebrewMonth = tomorrowHebrewDate.get("Month");
+  var tomorrowHebrewYear = tomorrowHebrewDate.get("Year");  
+  console.log(`${tomorrowHebrewDay} ${tomorrowHebrewMonth}`);
+  const defaultHead = `Tonight, ${getReadable(today)}, (${tomorrowHebrewDay} ${tomorrowHebrewMonth})`;
   for (var i in data) {
     if (i == 0) {continue;}
     // if erev Pesach, erev Shmini Shel Pesach, or erev Shavuos is Shabbos, send next three days on Friday (Rosh Hashana Sukkos, and Shmini Atzeres can't be on a Sunday)
-    if ((tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 14 && tomorrow.getDay() == 6 && data[i][1] == "Nissan") ||
-    (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 20 && tomorrow.getDay() == 6 && data[i][1] == "Nissan") ||
-    (tomorrowHebrewDate.get("Month") == "Sivan" && tomorrowHebrewDate.get("Day") == 5 && tomorrow.getDay() == 6 && data[i][1] == "Sivan"))  {
+    if ((tomorrowHebrewMonth == "Nissan" && tomorrowHebrewDay == 14 && tomorrow.getDay() == 6 && data[i][1] == "Nissan") ||
+    (tomorrowHebrewMonth == "Nissan" && tomorrowHebrewDay == 20 && tomorrow.getDay() == 6 && data[i][1] == "Nissan") ||
+    (tomorrowHebrewMonth == "Sivan" && tomorrowHebrewDay == 5 && tomorrow.getDay() == 6 && data[i][1] == "Sivan"))  {
       if (data[i][0] == 15 || data[i][0] == 21 || data[i][0] == 6) {
-        pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+        pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]})`, i, tomorrowHebrewYear);
       }
       if (data[i][0] == 16 || data[i][0] == 22 || data[i][0] == 7) {
-        pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+        pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]})`, i, tomorrowHebrewYear);
       }
       setSentUntil(2);
     }
     // send the 2nd day of Yom Tov on Erev Yom (Rosh Hashana, Sukkos, Shmini Atzeres, Pesach, Shmini Shel Pesach, and Shavuos)
     else {
-      if ((tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 1 && data[i][1] == "Tishrei" && data[i][0] == 2) ||
-        (tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Tishrei" && data[i][0] == 16) ||
-        (tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 22 && data[i][1] == "Tishrei" && data[i][0] == 23) ||
-        (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Nissan" && data[i][0] == 16) ||
-        (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 21 && data[i][1] == "Nissan" && data[i][0] == 22) ||
-        (tomorrowHebrewDate.get("Month") == "Sivan" && tomorrowHebrewDate.get("Day") == 6 && data[i][1] == "Sivan" && data[i][0] == 7)) {
-          pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+      if ((tomorrowHebrewMonth == "Tishrei" && tomorrowHebrewDay == 1 && data[i][1] == "Tishrei" && data[i][0] == 2) ||
+        (tomorrowHebrewMonth == "Tishrei" && tomorrowHebrewDay == 15 && data[i][1] == "Tishrei" && data[i][0] == 16) ||
+        (tomorrowHebrewMonth == "Tishrei" && tomorrowHebrewDay == 22 && data[i][1] == "Tishrei" && data[i][0] == 23) ||
+        (tomorrowHebrewMonth == "Nissan" && tomorrowHebrewDay == 15 && data[i][1] == "Nissan" && data[i][0] == 16) ||
+        (tomorrowHebrewMonth == "Nissan" && tomorrowHebrewDay == 21 && data[i][1] == "Nissan" && data[i][0] == 22) ||
+        (tomorrowHebrewMonth == "Sivan" && tomorrowHebrewDay == 6 && data[i][1] == "Sivan" && data[i][0] == 7)) {
+          pushInfo(`Tomorrow night, ${getReadable(tomorrow)}, (${data[i][0]} ${data[i][1]})`, i, tomorrowHebrewYear);
           if (PropertiesService.getScriptProperties().getProperty("sentUntil") != 2) {
             setSentUntil(1);
           }
           //if the day after Yom Tov is Shabbos, send three days after yom tov (Shavuos can't fall out on Thursday)
           if (today.getDay() == 3) {
-            if ((tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 1 && data[i][1] == "Tishrei" && data[i][0] == 3) ||
-        (tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Tishrei" && data[i][0] == 17) ||
-        (tomorrowHebrewDate.get("Month") == "Tishrei" && tomorrowHebrewDate.get("Day") == 22 && data[i][1] == "Tishrei" && data[i][0] == 24) ||
-        (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 15 && data[i][1] == "Nissan" && data[i][0] == 17) ||
-        (tomorrowHebrewDate.get("Month") == "Nissan" && tomorrowHebrewDate.get("Day") == 21 && data[i][1] == "Nissan" && data[i][0] == 23)) {
-          pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]}) is the yartzeit of~`, i);
+            if ((tomorrowHebrewMonth == "Tishrei" && tomorrowHebrewDay == 1 && data[i][1] == "Tishrei" && data[i][0] == 3) ||
+        (tomorrowHebrewMonth == "Tishrei" && tomorrowHebrewDay == 15 && data[i][1] == "Tishrei" && data[i][0] == 17) ||
+        (tomorrowHebrewMonth == "Tishrei" && tomorrowHebrewDay == 22 && data[i][1] == "Tishrei" && data[i][0] == 24) ||
+        (tomorrowHebrewMonth == "Nissan" && tomorrowHebrewDay == 15 && data[i][1] == "Nissan" && data[i][0] == 17) ||
+        (tomorrowHebrewMonth == "Nissan" && tomorrowHebrewDay == 21 && data[i][1] == "Nissan" && data[i][0] == 23)) {
+          pushInfo(`This coming ${getReadable(addDays(tomorrow, 1))}, (${data[i][0]} ${data[i][1]})`, i, tomorrowHebrewYear);
           setSentUntil(2);
           }
         }
       }
     }    
     //In a non-leap year, send yartziets of a leap year. Does not have Adar itself, will be processed in last if statement.
-    if (tomorrowHebrewDate.get("Month") == "Adar" && (data[i][1] == "Adar I" || data[i][1] == "Adar II") && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfoWithNote(defaultHead, i, `(The yartzeit is really on ${data[i][0]} ${data[i][1]}, but this year is not a leap year)`);
+    if (tomorrowHebrewMonth == "Adar" && (data[i][1] == "Adar I" || data[i][1] == "Adar II") && tomorrowHebrewDay == data[i][0]) {
+      pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `(The yartzeit is really on ${data[i][0]} ${data[i][1]}, but this year is not a leap year)`);
     }
     //If type of Adar is unknown
-    if ((tomorrowHebrewDate.get("Month") == "Adar" || tomorrowHebrewDate.get("Month") == "Adar II") && data[i][1] == "Adar ?" && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfo(defaultHead, i);
+    if ((tomorrowHebrewMonth == "Adar" || tomorrowHebrewMonth == "Adar II") && data[i][1] == "Adar ?" && tomorrowHebrewDay == data[i][0]) {
+      pushInfo(defaultHead, i, tomorrowHebrewYear);
     }
     //In leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav.
-    if (tomorrowHebrewDate.get("Month") == "Adar I" && data[i][1] == "Adar" && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfoWithNote(defaultHead, i, `The Yartziet is really on ${tomorrowHebrewDate.get("Day")} Adar. In a leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav what you should do`);
+    if (tomorrowHebrewMonth == "Adar I" && data[i][1] == "Adar" && tomorrowHebrewDay == data[i][0]) {
+      pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartziet is really on ${tomorrowHebrewDay} Adar. In a leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav what you should do`);
     }
     // According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat of a non-leap year
-    if (tomorrowHebrewDate.get("Month") == "Shvat" && !isLeapYear(tomorrowHebrewDate.get("Year"))) {
-      if (data[i][1] == "Adar I" && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfoWithNote(defaultHead, i, `The Yartzeit is really on ${tomorrowHebrewDate.get("Day")} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
+    if (tomorrowHebrewMonth == "Shvat" && !isLeapYear(tomorrowHebrewDate.get("Year"))) {
+      if (data[i][1] == "Adar I" && tomorrowHebrewDay == data[i][0]) {
+      pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartzeit is really on ${tomorrowHebrewDay} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
       }
     }
     //send 30 cheshvon on 1 kilev if this year there is no 30 cheshvon
-    if (tomorrowHebrewDate.get("Month") == "Kislev" && tomorrowHebrewDate.get("Day") == "1") {
+    if (tomorrowHebrewMonth == "Kislev" && tomorrowHebrewDay == "1") {
       let hebrewDate = getHebrewDate(today);
       if (hebrewDate.get("Day") == "29" && data[i][1] == "Cheshvan" && data[i][0] == 30) {
-        pushInfoWithNote(defaultHead, i,`The Yartzeit is really on 30 Cheshvan. However, this year there is no 30 Cheshvan, so the Yartziet is observed on 1 Kislev`);
+        pushInfoWithNote(defaultHead, i, tomorrowHebrewYear,`The Yartzeit is really on 30 Cheshvan. However, this year there is no 30 Cheshvan, so the Yartziet is observed on 1 Kislev`);
       }
     }
     //send 30 kislev on 1 teves if this year there is no 30 kislev
-    if (tomorrowHebrewDate.get("Month") == "Teves" && tomorrowHebrewDate.get("Day") == "1") {
+    if (tomorrowHebrewMonth == "Teves" && tomorrowHebrewDay == "1") {
       let hebrewDate = getHebrewDate(today);
       if (hebrewDate.get("Day") == "29" && data[i][1] == "Kislev" && data[i][0] == 30) {
-         pushInfoWithNote(defaultHead, i, `The Yartzeit is really on 30 Kislev. However, this year there is no 30 Kislev, so the Yartziet is observed on 1 Teves`);
+         pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartzeit is really on 30 Kislev. However, this year there is no 30 Kislev, so the Yartziet is observed on 1 Teves`);
       }
     }
     // send 30 Adar I on 1 Adar in a non - leap year
-    if (tomorrowHebrewDate.get("Month") == "Adar" && tomorrowHebrewDate.get("Day") == "1") {
+    if (tomorrowHebrewMonth == "Adar" && tomorrowHebrewDay == "1") {
       if (data[i][1] == "Adar I" && data[i][0] == 30) {
-       pushInfoWithNote(defaultHead, i, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar`);
+       pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar`);
       }
     }
     //last if statement, 
-    if (tomorrowHebrewDate.get("Month") == data[i][1] && tomorrowHebrewDate.get("Day") == data[i][0]) {
-      pushInfo(defaultHead, i);
+    if (tomorrowHebrewMonth == data[i][1] && tomorrowHebrewDay == data[i][0]) {
+      pushInfo(defaultHead, i, tomorrowHebrewYear);
     }
   }
   if (yartzeit.length != 0) {
     buildEmail();
   }
   else {
-    console.log("No Yartzeit Tomorrow");
+    console.log(`No Yartzeit ${isTomorrow ? "Tomorrow" : "in two days"}`);
   }
   }
 }
 
-function pushInfo(head, i) {
-  yartzeit.push(head);
-  for (var j = 3; j < 9; j++) {
-   yartzeit.push(data[i][j]);
-  }
-}
-
-function pushInfoWithNote(head, i, note) {
-  yartzeit.push(head);
- for (var j = 3; j < 8; j++) {
-   if (j == 5) {yartzeit.push(`${data[i][j]}^`); continue;}
-   else {yartzeit.push(data[i][j]);}
- }
-  yartzeit.push(note);
-  yartzeit.push(data[i][8]); //Family Name
+function pushInfo(head, i, thisYear, note = '') {
+    yartzeit.push(head);
+    for (var j = 2; j < 8; j++) {
+        if (j == 2) {
+            yartzeit.push(getNumOfYear(data[i][j], thisYear));
+            continue;
+        }
+        if (j == 5 && note !== '') {
+            yartzeit.push(`${data[i][j]}^`);
+            continue;
+        }
+        yartzeit.push(data[i][j]);
+    }
+    if (note !== '') {
+        yartzeit.push(note);
+    }
+        yartzeit.push(data[i][8]); // Family Name
 }
 
 function getHebrewDate(d) {
@@ -246,8 +251,14 @@ function isLeapYear(year) {
     return (((year * 7) + 1) % 19) < 7;
 }
 
-function getUrls(str, delimiter) {
-  return (!str.includes(delimiter) ? [str] : str.split(delimiter));
+function getUrls(str, delimiter) {  
+  !str.includes(delimiter) ? str = [str] : str = str.split(delimiter);
+  if (delimiter == "*") {
+  for (var i = 0; i < str.length; i++) {
+    str[i] = `https://lh3.googleusercontent.com/d/${str[i].substring(str[i].indexOf("d/") + 2, str[i].indexOf("/view"))}=s750?authuser=0`;
+  }
+  }
+  return str;
 }
 
 function setSentUntil(days) {
@@ -268,4 +279,30 @@ for (var i in picUrlArr) {
 }
 html += `<p>To update your email preferences, click here: <a href="bit.ly/familyYartzeits">bit.ly/familyYartzeits</a>`;
 return html;
+}
+
+function getNumOfYear(yartzeitYear, thisYear) {
+  if (yartzeitYear == "") {
+    return `is the (year of passing unknown) yartzeit of~`
+  }
+  const num = thisYear - parseInt(yartzeitYear.substring(yartzeitYear.indexOf("/") + 1));
+  return `is the ${num}${getSuffix(num)} yartzeit of~`;
+}
+
+function getSuffix(number) {
+    if (number % 100 >= 11 && number % 100 <= 13) {
+        return "th";
+    }
+    
+    switch (number % 10) {
+        case 1:
+            return "st";
+        case 2:
+            return "nd";
+        case 3:
+            return "rd";
+        default:
+            return "th";
+    }
+}
 }
