@@ -1,4 +1,4 @@
-const sheet = SpreadsheetApp.openById(/*ID Removed*/);
+const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
 const data = sheet.getSheets()[1].getDataRange().getValues();
 const emails = sheet.getSheets()[0].getDataRange().getValues();
 var yartzeit = [];
@@ -84,18 +84,11 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
       pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartzeit is really on ${tomorrowHebrewDay} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
       }
     }
-    //send 30 cheshvon on 1 kilev if this year there is no 30 cheshvon
-    if (tomorrowHebrewMonth == "Kislev" && tomorrowHebrewDay == "1") {
+    //send 30 cheshvon/kislev/ on 1 kilev/teves if this year there is no 30 cheshvon/kislev
+    if ((tomorrowHebrewMonth == "Kislev" || tomorrowHebrewMonth == "Teves") && tomorrowHebrewDay == "1") {
       let hebrewDate = getHebrewDate(today);
-      if (hebrewDate.get("Day") == "29" && data[i][1] == "Cheshvan" && data[i][0] == 30) {
-        pushInfoWithNote(defaultHead, i, tomorrowHebrewYear,`The Yartzeit is really on 30 Cheshvan. However, this year there is no 30 Cheshvan, so the Yartziet is observed on 1 Kislev`);
-      }
-    }
-    //send 30 kislev on 1 teves if this year there is no 30 kislev
-    if (tomorrowHebrewMonth == "Teves" && tomorrowHebrewDay == "1") {
-      let hebrewDate = getHebrewDate(today);
-      if (hebrewDate.get("Day") == "29" && data[i][1] == "Kislev" && data[i][0] == 30) {
-         pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartzeit is really on 30 Kislev. However, this year there is no 30 Kislev, so the Yartziet is observed on 1 Teves`);
+      if (hebrewDate.get("Day") == "29" /*not 30*/ && (data[i][1] == "Cheshvan" || data[i][1] == "Kislev") && data[i][0] == 30) {
+        pushInfoWithNote(defaultHead, i, tomorrowHebrewYear,`The Yartzeit is really on 30 ${data[i][1]}. However, this year there is no 30 ${data[i][1]}, so the Yartziet is observed on 1 ${tomorrowHebrewMonth}`);
       }
     }
     // send 30 Adar I on 1 Adar in a non - leap year
@@ -104,7 +97,7 @@ console.log("lastDaySent: " + PropertiesService.getScriptProperties().getPropert
        pushInfoWithNote(defaultHead, i, tomorrowHebrewYear, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar`);
       }
     }
-    //last if statement, 
+    //last if statement, does regular yartzeit
     if (tomorrowHebrewMonth == data[i][1] && tomorrowHebrewDay == data[i][0]) {
       pushInfo(defaultHead, i, tomorrowHebrewYear);
     }
@@ -210,7 +203,7 @@ const row = parseInt(yartzeit.substring(0,yartzeit.indexOf("|")));
 body = body.slice(0, -2) + ".";
 var  html = buildHtml(body, picUrls, vidUrls);
 if (!isTomorrow) {
-  GmailApp.sendEmail("aribennett1@gmail.com", "TEST Yartzeit Reminder", "", {
+  GmailApp.sendEmail("slot700@gmail.com", "TEST Yartzeit Reminder", "", {
           from: "aribennett1@gmail.com",
           htmlBody: html,
           name: "Yartzeit Reminder"
@@ -235,7 +228,7 @@ else {
 
 function getReadable(day) {
   if (day.getDay() == 6) {
-    return `Montzei Shabbos`;}  
+    return `Motzei Shabbos`;}  
   else {
     return `${new Date(day).toLocaleDateString('en-us', { weekday:"long"})} night`;
   }
@@ -283,7 +276,7 @@ return html;
 
 function getNumOfYear(yartzeitYear, thisYear) {
   if (yartzeitYear == "") {
-    return `is the (year of passing unknown) yartzeit of~`
+    return `is the yartzeit of~`
   }
   const num = thisYear - parseInt(yartzeitYear.substring(yartzeitYear.indexOf("/") + 1));
   return `is the ${num}${getSuffix(num)} yartzeit of~`;
@@ -304,5 +297,4 @@ function getSuffix(number) {
         default:
             return "th";
     }
-}
 }
