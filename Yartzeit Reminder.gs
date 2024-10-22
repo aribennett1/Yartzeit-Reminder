@@ -3,7 +3,7 @@ const yartzeits = [];
 let thisHebrewYear = '';
 let isTest, emails;
 let today = new Date();  // date format: "3/29/2022" (with quotes)
-function main() {  
+function main() {
   if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
     console.log("Yartzeit was sent for today, exiting...");
     return; //this should be "continue" when testing! (not "return")
@@ -24,17 +24,14 @@ function main() {
   emails = sheet.getSheets()[0].getDataRange().getValues();
   removeFromTrash();
   for (let x = 1; x < 3; x++) {
-    if (x == 2) { today = addDays(today, 1); }
     isTest = x == 2;
+    if (isTest) { today = addDays(today, (parseInt(PropertiesService.getScriptProperties().getProperty("sentUntil")) + 1)); }
     let tomorrow = addDays(today, 1);
-    const tomorrowHebrewDate = getHebrewDate(tomorrow);
-    getYartzeitsToSend(tomorrowHebrewDate.get("Month"), tomorrowHebrewDate.get("Day"));
-    console.log("len: " + yartzeitsToSend.length)
-    for (let yartzeit of yartzeitsToSend) {
-      sendEmail(buildEmail(yartzeit), yartzeit.family);
-    }
+    const { hebrewDay, hebrewMonth } = getHebrewDate(tomorrow);
+    getYartzeitsToSend(hebrewMonth, hebrewDay);
+    yartzeitsToSend.forEach(yartzeit => sendEmail(buildEmail(yartzeit), yartzeit.family));
     if (yartzeitsToSend.length == 0) {
-      console.log(`No Yartzeit ${isTest ? "in two days" : "Tomorrow"}`);
+      console.log(`No Yartzeits on ${hebrewDay} ${hebrewMonth}`);
     }
     yartzeitsToSend.length = 0;
   }
@@ -42,9 +39,7 @@ function main() {
 
 function getYartzeitListFromSheet(sheet) {
   const data = sheet.getSheets()[1].getDataRange().getValues();
-
   for (let i = 1; i < data.length; i++) {
-
     const row = data[i];
 
     const day = row[0];
@@ -59,10 +54,9 @@ function getYartzeitListFromSheet(sheet) {
     let videos = row[7] ? row[7].split(",").map(str => {
       return str.replace(/([^:]+): ([^ ]+) Alternate Link: ([^ ]+)/g, '$1: <a href="$2">$2</a> Alternate Link: <a href="$3">$3</a>');
     }) : [];
-
     const family = FamilyEnum[row[8].toUpperCase()];
-    yartzeits.push(new Yartzeit(day, month, year, englishName, hebrewName, notes, pictures, videos, family));
 
+    yartzeits.push(new Yartzeit(day, month, year, englishName, hebrewName, notes, pictures, videos, family));
   }
 }
 
@@ -115,15 +109,15 @@ function getYartzeitsToSend(tomorrowHebrewMonth, tomorrowHebrewDay) {
       addYartzeit(yartzeit, `The Yartziet is really on ${tomorrowHebrewDay} Adar. In a leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav what you should do`);
     }
     // According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat of a non-leap year
-    if (tomorrowHebrewMonth == "Shvat" && !isLeapYear(tomorrowHebrewDate.get("Year"))) {
+    if (tomorrowHebrewMonth == "Shvat" && !isLeapYear(thisHebrewYear)) {
       if (yartzeit.month == "Adar I" && tomorrowHebrewDay == yartzeit.day) {
         addYartzeit(yartzeit, `The Yartzeit is really on ${tomorrowHebrewDay} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
       }
     }
     //send 30 cheshvon/kislev/ on 1 kilev/teves if this year there is no 30 cheshvon/kislev
     if ((tomorrowHebrewMonth == "Kislev" || tomorrowHebrewMonth == "Teves") && tomorrowHebrewDay == "1") {
-      let hebrewDate = getHebrewDate(today);
-      if (hebrewDate.get("Day") == "29" /*not 30*/ && (yartzeit.month == "Cheshvan" || yartzeit.month == "Kislev") && yartzeit.day == 30) {
+      const { hebrewDay: todayHebrewDay } = getHebrewDate(today);
+      if (todayHebrewDay == "29" /*not 30*/ && (yartzeit.month == "Cheshvan" || yartzeit.month == "Kislev") && yartzeit.day == 30) {
         addYartzeit(yartzeit, `The Yartzeit is really on 30 ${yartzeit.month}. However, this year there is no 30 ${yartzeit.month}, so the Yartziet is observed on 1 ${tomorrowHebrewMonth}`);
       }
     }
@@ -151,38 +145,21 @@ function addYartzeit(yartzeit, note = "", inHowManyDays = 0) {
 
 function getHebrewDate(d) {
   let year = d.getFullYear();
-  let month = d.getMonth() + 1;
-  if (month.toString().length != 2) {
-    month = "0" + month;
-  }
-  let day = d.getDate();
-  if (day.toString().length != 2) {
-    day = "0" + day;
-  }
+  let month = (d.getMonth() + 1).toString().padStart(2, '0');
+  let day = d.getDate().toString().padStart(2, '0');
   let hebcal = JSON.parse(UrlFetchApp.fetch(`https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`).getContentText());
   thisHebrewYear = hebcal.hy;
-  let hebrewMonth = hebcal.hm;
-  hebrewMonth = hebrewMonth.replaceAll("Nisan", "Nissan").replaceAll("Iyyar", "Iyar").replaceAll("Tevet", "Teves").replaceAll("Sh'vat", "Shvat");
-  let hewbrewDay = hebcal.hd;
-  const hebrewDate = new Map();
-  hebrewDate.set("Month", hebrewMonth);
-  hebrewDate.set("Day", hewbrewDay);
-  return hebrewDate;
+  return {hebrewDay: hebcal.hd, hebrewMonth:hebcal.hm.replaceAll("Nisan", "Nissan").replaceAll("Iyyar", "Iyar").replaceAll("Tevet", "Teves").replaceAll("Sh'vat", "Shvat")};
 }
 
 function buildEmail(yartzeit) {
   let html = `<p>${getStarter(yartzeit.inHowManyDays)} ${getReadable(addDays(today, yartzeit.inHowManyDays))}${yartzeit.inHowManyDays < 2 ? ',' : ''} (${yartzeit.day} ${yartzeit.month}) ${getNumOfYear(yartzeit.year)} ${yartzeit.englishName}${yartzeit.englishName ? ',' : ''} ${yartzeit.hebrewName}, ${yartzeit.notes}. ${yartzeit.note}${yartzeit.note ? '.' : ''}</p>`;
-
   yartzeit.videos.length == 1 ? html += `<p>1 Video</p>` : html += `<p>${yartzeit.videos.length} Videos</p>`;
   html += "<ul>";
-  for (let videoUrl of yartzeit.videos) {
-    html += `<li>${videoUrl}</li>`;
-  }
+  html += yartzeit.videos.map(videoUrl => `<li>${videoUrl}</li>`).join('');
   html += `</ul><p>If you'd like to record a video (or just record audio) for someone's yartzeit, please email me at <a href="mailto:aribennett1@gmail.com">aribennett1@gmail.com.</a></p>`;
   yartzeit.pictures.length == 1 ? html += `<p>1 Picture</p>` : html += `<p>${yartzeit.pictures.length} Pictures</p>`;
-  for (let picUrl of yartzeit.pictures) {
-    html += `<p><img src="${picUrl}"></p>`;
-  }
+  html += yartzeit.pictures.map(picUrl => `<p><img src="${picUrl}"></p>`).join('');
   html += `<p>To update your email preferences, click here: <a href="bit.ly/familyYartzeits">bit.ly/familyYartzeits</a>`;
   return html;
 }
