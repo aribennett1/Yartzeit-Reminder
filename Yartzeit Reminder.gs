@@ -113,7 +113,7 @@ function getYartzeitsToSend(tomorrowHebrewMonth, tomorrowHebrewDay) {
         addYartzeit(yartzeit, `The Yartzeit is really on ${tomorrowHebrewDay} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
       }
     }
-    //send 30 cheshvon/kislev/ on 1 kilev/teves if this year there is no 30 cheshvon/kislev
+    //send 30 cheshvon/kislev on 1 kilev/teves if this year there is no 30 cheshvon/kislev
     if ((tomorrowHebrewMonth == "Kislev" || tomorrowHebrewMonth == "Teves") && tomorrowHebrewDay == "1") {
       const { hebrewDay: todayHebrewDay } = getHebrewDate(today);
       if (todayHebrewDay == "29" /*not 30*/ && (yartzeit.month == "Cheshvan" || yartzeit.month == "Kislev") && yartzeit.day == 30) {
