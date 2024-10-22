@@ -94,7 +94,6 @@ function getYartzeitsToSend(tomorrowHebrewMonth, tomorrowHebrewDay) {
         }
       }
     }
-
     //In a non-leap year, send yartziets of a leap year. Does not have Adar itself, will be processed in last if statement.
     if (tomorrowHebrewMonth == "Adar" && (yartzeit.month == "Adar I" || yartzeit.month == "Adar II") && tomorrowHebrewDay == yartzeit.day) {
       addYartzeit(yartzeit, `(The yartzeit is really on ${yartzeit.day} ${yartzeit.month}, but this year is not a leap year)`);
@@ -108,10 +107,8 @@ function getYartzeitsToSend(tomorrowHebrewMonth, tomorrowHebrewDay) {
       addYartzeit(yartzeit, `The Yartziet is really on ${tomorrowHebrewDay} Adar. In a leap year, yartziets for non-leap years are observed in Adar I. However, this is a big machlokes, so ask a rav what you should do`);
     }
     // According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat of a non-leap year
-    if (tomorrowHebrewMonth == "Shvat" && !isLeapYear(thisHebrewYear)) {
-      if (yartzeit.month == "Adar I" && tomorrowHebrewDay == yartzeit.day) {
-        addYartzeit(yartzeit, `The Yartzeit is really on ${tomorrowHebrewDay} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
-      }
+    if (tomorrowHebrewMonth == "Shvat" && !isLeapYear(thisHebrewYear) && yartzeit.month == "Adar I" && tomorrowHebrewDay == yartzeit.day) {
+      addYartzeit(yartzeit, `The Yartzeit is really on ${tomorrowHebrewDay} Adar I. However, According to the Piskei Teshuvos, some "Chassidim" observe the yartzits of Adar I in Shvat in a non-leap year`);
     }
     //send 30 cheshvon/kislev on 1 kilev/teves if this year there is no 30 cheshvon/kislev
     if ((tomorrowHebrewMonth == "Kislev" || tomorrowHebrewMonth == "Teves") && tomorrowHebrewDay == "1") {
@@ -146,7 +143,7 @@ function getHebrewDate(d) {
   let day = d.getDate().toString().padStart(2, '0');
   let hebcal = JSON.parse(UrlFetchApp.fetch(`https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`).getContentText());
   thisHebrewYear = hebcal.hy;
-  return {hebrewDay: hebcal.hd, hebrewMonth:hebcal.hm.replaceAll("Nisan", "Nissan").replaceAll("Iyyar", "Iyar").replaceAll("Tevet", "Teves").replaceAll("Sh'vat", "Shvat")};
+  return { hebrewDay: hebcal.hd, hebrewMonth: hebcal.hm.replaceAll("Nisan", "Nissan").replaceAll("Iyyar", "Iyar").replaceAll("Tevet", "Teves").replaceAll("Sh'vat", "Shvat") };
 }
 
 function buildEmail(yartzeit) {
