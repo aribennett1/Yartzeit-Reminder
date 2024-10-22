@@ -3,10 +3,7 @@ const yartzeits = [];
 let thisHebrewYear = '';
 let isTest, emails;
 let today = new Date();  // date format: "3/29/2022" (with quotes)
-function main() {
-  const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
-  getYartzeitListFromSheet(sheet);
-  emails = sheet.getSheets()[0].getDataRange().getValues();
+function main() {  
   if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
     console.log("Yartzeit was sent for today, exiting...");
     return; //this should be "continue" when testing! (not "return")
@@ -22,12 +19,17 @@ function main() {
     console.log("Today's yartzeit were sent in advace, exiting...");
     return; //this should be "continue" when testing! (not "return")
   }
+  const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
+  getYartzeitListFromSheet(sheet);
+  emails = sheet.getSheets()[0].getDataRange().getValues();
+  removeFromTrash();
   for (let x = 1; x < 3; x++) {
     if (x == 2) { today = addDays(today, 1); }
     isTest = x == 2;
     let tomorrow = addDays(today, 1);
     const tomorrowHebrewDate = getHebrewDate(tomorrow);
     getYartzeitsToSend(tomorrowHebrewDate.get("Month"), tomorrowHebrewDate.get("Day"));
+    console.log("len: " + yartzeitsToSend.length)
     for (let yartzeit of yartzeitsToSend) {
       sendEmail(buildEmail(yartzeit), yartzeit.family);
     }
@@ -54,7 +56,7 @@ function getYartzeitListFromSheet(sheet) {
     const pictures = row[6] ? row[6].split(",").map(str => {
       return `https://lh3.googleusercontent.com/d/${str.substring(str.indexOf("d/") + 2, str.indexOf("/view"))}=s750?authuser=0`;
     }) : [];
-    let videos = row[7] ? row[7].split("#").map(str => {
+    let videos = row[7] ? row[7].split(",").map(str => {
       return str.replace(/([^:]+): ([^ ]+) Alternate Link: ([^ ]+)/g, '$1: <a href="$2">$2</a> Alternate Link: <a href="$3">$3</a>');
     }) : [];
 
@@ -169,7 +171,7 @@ function getHebrewDate(d) {
 }
 
 function buildEmail(yartzeit) {
-  let html = `<p>${getStarter(yartzeit.inHowManyDays)} ${getReadable(addDays(today, yartzeit.inHowManyDays))}, (${yartzeit.day} ${yartzeit.month}) ${getNumOfYear(yartzeit.year)} ${yartzeit.englishName}${yartzeit.englishName ? ',' : ''} ${yartzeit.hebrewName}, ${yartzeit.notes}. ${yartzeit.note}${yartzeit.note ? '.' : ''}</p>`;
+  let html = `<p>${getStarter(yartzeit.inHowManyDays)} ${getReadable(addDays(today, yartzeit.inHowManyDays))}${yartzeit.inHowManyDays < 2 ? ',' : ''} (${yartzeit.day} ${yartzeit.month}) ${getNumOfYear(yartzeit.year)} ${yartzeit.englishName}${yartzeit.englishName ? ',' : ''} ${yartzeit.hebrewName}, ${yartzeit.notes}. ${yartzeit.note}${yartzeit.note ? '.' : ''}</p>`;
 
   yartzeit.videos.length == 1 ? html += `<p>1 Video</p>` : html += `<p>${yartzeit.videos.length} Videos</p>`;
   html += "<ul>";
@@ -235,7 +237,7 @@ function getStarter(inHowManyDays) {
     case 1:
       return "Tomorrow night,";
     default:
-      return "On";
+      return "";
   }
 }
 
