@@ -22,7 +22,6 @@ function main() {
   const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
   getYartzeitListFromSheet(sheet);
   emails = sheet.getSheets()[0].getDataRange().getValues();
-  removeFromTrash();
   for (let x = 1; x < 3; x++) {
     isTest = x == 2;
     if (isTest) { today = addDays(today, (parseInt(PropertiesService.getScriptProperties().getProperty("sentUntil")) + 1)); }
