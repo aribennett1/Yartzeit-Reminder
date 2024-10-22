@@ -121,10 +121,8 @@ function getYartzeitsToSend(tomorrowHebrewMonth, tomorrowHebrewDay) {
       }
     }
     // send 30 Adar I on 1 Adar in a non - leap year
-    if (tomorrowHebrewMonth == "Adar" && tomorrowHebrewDay == "1") {
-      if (yartzeit.month == "Adar I" && yartzeit.day == 30) {
-        addYartzeit(yartzeit, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar`);
-      }
+    if (tomorrowHebrewMonth == "Adar" && tomorrowHebrewDay == "1" && yartzeit.month == "Adar I" && yartzeit.day == 30) {
+      addYartzeit(yartzeit, `The Yartzeit is really on 30 Adar I. However, this year isn't a leap year, so the Yartziet is observed on 1 Adar`);
     }
     //last if statement, does regular yartzeit
     if (tomorrowHebrewMonth == yartzeit.month && tomorrowHebrewDay == yartzeit.day) {
