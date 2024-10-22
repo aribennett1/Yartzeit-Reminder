@@ -169,7 +169,7 @@ function getHebrewDate(d) {
 }
 
 function buildEmail(yartzeit) {
-  let html = `<p>${getStarter(yartzeit.inHowManyDays)} ${getReadable(addDays(today, yartzeit.inHowManyDays))}, (${yartzeit.day} ${yartzeit.month}) ${getNumOfYear(yartzeit.year)} ${yartzeit.englishName}${yartzeit.englishName ? ',' : ''} ${yartzeit.hebrewName}. ${yartzeit.note}${yartzeit.note ? '.' : ''}</p>`;
+  let html = `<p>${getStarter(yartzeit.inHowManyDays)} ${getReadable(addDays(today, yartzeit.inHowManyDays))}, (${yartzeit.day} ${yartzeit.month}) ${getNumOfYear(yartzeit.year)} ${yartzeit.englishName}${yartzeit.englishName ? ',' : ''} ${yartzeit.hebrewName}, ${yartzeit.notes}. ${yartzeit.note}${yartzeit.note ? '.' : ''}</p>`;
 
   yartzeit.videos.length == 1 ? html += `<p>1 Video</p>` : html += `<p>${yartzeit.videos.length} Videos</p>`;
   html += "<ul>";
