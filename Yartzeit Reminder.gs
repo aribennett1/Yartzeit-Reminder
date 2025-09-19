@@ -182,14 +182,9 @@ function sendEmail(html, row) {
   console.log(`RemainingDailyQuota: ${MailApp.getRemainingDailyQuota()}`);
 }
 
-function getReadable(day) {
-  if (day.getDay() == 6) {
-    return `Motzei Shabbos`;
-  }
-  else {
-    return `${new Date(day).toLocaleDateString('en-us', { weekday: "long" })} night`;
-  }
-}
+const getReadable = (day) => day.getDay() === 6 
+  ? "Motzei Shabbos" 
+  : `${day.toLocaleString('en-us', { weekday: "long" })} night`;
 
 function addDays(date, days) {
   let result = new Date(date);
@@ -197,9 +192,7 @@ function addDays(date, days) {
   return result;
 }
 
-function isLeapYear(year) {
-  return (((year * 7) + 1) % 19) < 7;
-}
+const isLeapYear = year => (year * 7 + 1) % 19 < 7;
 
 function getStarter(inHowManyDays) {
   switch (inHowManyDays) {
