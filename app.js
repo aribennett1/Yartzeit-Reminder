@@ -108,20 +108,24 @@ function parseVideos(videoCell) {
     return [];
   }
 
+  const segments = videoCell.split(/,(?=[^:]+:\s*https?:\/\/)/);
   const pattern =
-    /([^:]+):\s*(https?:\/\/\S+?)\s+Alternate [Ll]ink:\s*(https?:\/\/\S+)/g;
-  const videos = [];
-  let match;
+    /^([^:]+):\s*(https?:\/\/[^\s,]+)\s+Alternate [Ll]ink:\s*(https?:\/\/[^\s,]+)/i;
 
-  while ((match = pattern.exec(videoCell)) !== null) {
-    videos.push({
-      label: match[1].trim(),
-      primaryUrl: match[2].trim(),
-      alternateUrl: match[3].trim(),
-    });
-  }
+  return segments
+    .map((segment) => {
+      const match = segment.trim().match(pattern);
+      if (!match) {
+        return null;
+      }
 
-  return videos;
+      return {
+        label: match[1].trim(),
+        primaryUrl: match[2].trim(),
+        alternateUrl: match[3].trim(),
+      };
+    })
+    .filter(Boolean);
 }
 
 function extractYouTubeId(url) {
