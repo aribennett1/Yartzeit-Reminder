@@ -14,7 +14,7 @@ const HEBREW_MONTH_ORDER = [
   "Nissan",
   "Iyar",
   "Sivan",
-  "Tammuz",
+  "Tamuz",
   "Av",
   "Elul",
 ];
