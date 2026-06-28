@@ -1,0 +1,235 @@
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --text: #2c2416;
+  --muted: #6b5f4f;
+  --accent: #4a6741;
+  --accent-soft: #e8efe5;
+  --border: #ddd4c4;
+  --shadow: 0 1px 3px rgba(44, 36, 22, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, #faf8f4 0%, var(--bg) 100%);
+  line-height: 1.5;
+}
+
+.site-header,
+.site-footer {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+#app {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.status-message {
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.status-error {
+  color: #8b2e2e;
+  background: #fdf3f3;
+  border-color: #e8caca;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.family-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tab-button {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tab-button:hover {
+  border-color: var(--accent);
+}
+
+.tab-button[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.yahrzeit-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.yahrzeit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.yahrzeit-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.yahrzeit-summary:hover {
+  background: rgba(74, 103, 65, 0.04);
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+}
+
+.yahrzeit-card[open] .chevron {
+  transform: rotate(90deg);
+}
+
+.yahrzeit-title {
+  flex: 1;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.yahrzeit-details {
+  padding: 0 1.1rem 1.1rem 3.1rem;
+  border-top: 1px solid var(--border);
+}
+
+.detail-block + .detail-block {
+  margin-top: 1rem;
+}
+
+.detail-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.detail-text {
+  margin: 0;
+  color: var(--text);
+}
+
+.media-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.media-grid.pictures {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.media-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: #f0ece4;
+}
+
+.video-block {
+  padding: 0.85rem;
+  border-radius: 0.65rem;
+  background: var(--accent-soft);
+  border: 1px solid #d5e0d1;
+}
+
+.video-label {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.video-embed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #000;
+}
+
+.alternate-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.alternate-link:hover {
+  text-decoration: none;
+}
+
+.site-footer {
+  color: var(--muted);
+  font-size: 0.92rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .yahrzeit-details {
+    padding-left: 1.1rem;
+  }
+}

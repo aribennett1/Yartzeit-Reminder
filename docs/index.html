@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Yahrzeits</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Family Yahrzeits</h1>
+  </header>
+
+  <main id="app">
+    <div id="loading" class="status-message">Loading yahrzeits…</div>
+    <div id="error" class="status-message status-error hidden"></div>
+    <nav id="family-tabs" class="family-tabs hidden" role="tablist" aria-label="Filter by family"></nav>
+    <section id="yahrzeit-list" class="yahrzeit-list hidden" aria-live="polite"></section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
