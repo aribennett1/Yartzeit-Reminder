@@ -173,7 +173,7 @@ function parseYahrzeitRow(row) {
     year: String(year || "").trim(),
     englishName: String(englishName || "").trim(),
     hebrewName: String(hebrewName || "").trim(),
-    notes: String(notes || "").trim(),
+    notes: stripHtmlComments(notes),
     pictures: parsePictures(picture),
     videos: parseVideos(video),
     family: String(family || "").trim(),
@@ -332,6 +332,12 @@ function createYahrzeitCard(yahrzeit) {
 
   card.append(summary, details);
   return card;
+}
+
+function stripHtmlComments(value) {
+  return String(value || "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .trim();
 }
 
 function escapeHtml(value) {
