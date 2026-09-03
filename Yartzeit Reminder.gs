@@ -3,29 +3,37 @@ const yartzeits = [];
 let thisHebrewYear = '';
 let isTest, emails;
 let today = new Date();  // date format: "3/29/2022" (with quotes)
+let tomorrow;
+
 function main() {
-  if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
-    console.log("Yartzeit was sent for today, exiting...");
-    return; //this should be "continue" when testing! (not "return")
-  }
-  else {
-    PropertiesService.getScriptProperties().setProperty("lastDaySent", today.getDay());
-    console.log("lastDaySent: " + PropertiesService.getScriptProperties().getProperty("lastDaySent"));
-  }
-  if (PropertiesService.getScriptProperties().getProperty("sentUntil") > 0) {
-    const toSet = PropertiesService.getScriptProperties().getProperty("sentUntil") - 1;
-    console.log(`Setting sentUntil to ${toSet}...`);
-    PropertiesService.getScriptProperties().setProperty("sentUntil", toSet);
-    console.log("Today's yartzeit were sent in advace, exiting...");
-    return; //this should be "continue" when testing! (not "return")
-  }
   const sheet = SpreadsheetApp.openById("1dwd73mDGAOcbA_cjX-e76zgi-8nX9WiFE0pRDHpd794");
   getYartzeitListFromSheet(sheet);
   emails = sheet.getSheets()[0].getDataRange().getValues();
+  const originalToday = today;
+
   for (let x = 1; x < 3; x++) {
     isTest = x == 2;
-    if (isTest) { today = addDays(today, (parseInt(PropertiesService.getScriptProperties().getProperty("sentUntil")) + 1)); }
-    let tomorrow = addDays(today, 1);
+    today = isTest ? addDays(originalToday, 1) : originalToday;
+
+    if (!isTest) {
+      if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
+        console.log("Yartzeit was sent for today, exiting...");
+        continue;
+      }
+      else {
+        PropertiesService.getScriptProperties().setProperty("lastDaySent", today.getDay());
+        console.log("lastDaySent: " + PropertiesService.getScriptProperties().getProperty("lastDaySent"));
+      }
+      if (PropertiesService.getScriptProperties().getProperty("sentUntil") > 0) {
+        const toSet = PropertiesService.getScriptProperties().getProperty("sentUntil") - 1;
+        console.log(`Setting sentUntil to ${toSet}...`);
+        PropertiesService.getScriptProperties().setProperty("sentUntil", toSet);
+        console.log("Today's yartzeit were sent in advace, exiting...");
+        continue;
+      }
+    }
+
+    tomorrow = addDays(today, 1);
     const { hebrewDay, hebrewMonth } = getHebrewDate(tomorrow);
     getYartzeitsToSend(hebrewMonth, hebrewDay);
     yartzeitsToSend.forEach(yartzeit => sendEmail(buildEmail(yartzeit), yartzeit.family));
