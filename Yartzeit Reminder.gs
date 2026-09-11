@@ -13,7 +13,7 @@ function main() {
 
   for (let x = 1; x < 3; x++) {
     isTest = x == 2;
-    today = isTest ? addDays(originalToday, 1) : originalToday;
+    today = isTest ? addDays(originalToday, getSentUntil() + 1) : originalToday;
 
     if (!isTest) {
       if (PropertiesService.getScriptProperties().getProperty("lastDaySent") == today.getDay()) {
@@ -198,6 +198,10 @@ function addDays(date, days) {
   let result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
+}
+
+function getSentUntil() {
+  return parseInt(PropertiesService.getScriptProperties().getProperty("sentUntil")) || 0;
 }
 
 const isLeapYear = year => (year * 7 + 1) % 19 < 7;
